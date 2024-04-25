@@ -4,6 +4,7 @@ FROM node:21-alpine3.19 AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json yarn.lock ./
+COPY public ./public
 RUN yarn install --frozen-lockfile
 
 
@@ -11,6 +12,7 @@ RUN yarn install --frozen-lockfile
 FROM node:21-alpine3.19 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/public ./public
 COPY . .
 RUN yarn build
 
@@ -26,6 +28,7 @@ COPY package.json yarn.lock ./
 RUN yarn install --prod
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 
 # # Copiar el directorio y su contenido
 # RUN mkdir -p ./pokedex
